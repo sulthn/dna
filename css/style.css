@@ -1,0 +1,38 @@
+* {
+    margin: 0;
+}
+
+#mainScreen {
+    display: block;
+    background: radial-gradient(#808080 40%, #1b1b1b);
+}
+
+.gui {
+    position: absolute;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+}
+
+.window {
+    left: 10%;
+    top: calc(50% - 20%);
+    width: 20%;
+    height: 40%;
+    padding: 20px;
+    border-color: #1b1b1b90;
+    border-radius: 5px;
+    background-color: #1b1b1b90;
+    position: absolute;
+    color: white;
+}
+
+.title {
+    text-align: center;
+    font-family: 'Bebas Neue', sans-serif;
+}
+
+.description {
+    text-align: justify;
+    font-family: 'Source Code Pro', monospace;
+}

@@ -1,10 +1,30 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>DNA</title>
+  <title>DNA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Source+Code+Pro:wght@500&display=swap" rel="stylesheet">
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.157.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.157.0/examples/jsm/"
+    }
+  }
+  </script>
+  <link rel="stylesheet" type="text/css" href="css/style.css">
 </head>
-<body>
-    <p>aku cinta mr dave tanga an del campo</p>
+<body onresize="resize">
+  <canvas id="mainScreen"></canvas>
 
+  <div class="gui">
+    <div class="window">
+      <h1 class="title">DNA</h1>
+      <p class="description">hello mister</p>
+    </div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
 </body>
 </html>
