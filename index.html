@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>DNA</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Source+Code+Pro:wght@500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&family=Bebas+Neue&family=Source+Code+Pro:wght@500&display=swap" />
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <link rel="icon" type="image/x-icon" href="/images/favicon.png">
   <script type="importmap">
   {
     "imports": {
@@ -15,13 +18,18 @@
   </script>
   <link rel="stylesheet" type="text/css" href="css/style.css">
 </head>
-<body onresize="resize">
+<body>
   <canvas id="mainScreen"></canvas>
 
   <div class="gui">
+    <div id="icons">
+      <span title="Enable Spin" id="spin-btn" class="icon material-symbols-outlined active">genetics</span>
+      <span title="Description" id="description-btn" class="icon material-symbols-outlined mobile-dependent">description</span>
+    </div>
     <div class="window">
+      <span id="close-window" class="material-symbols-outlined mobile-dependent">close</span>
       <h1 class="title">DNA</h1>
-      <p class="description">hello mister</p>
+      <p class="description">Deoxyribo Nucleic Acid (DNA) is the molecule that carries genetic information that defines who we are.</p>
     </div>
   </div>
 
