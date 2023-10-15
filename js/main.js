@@ -6,7 +6,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 let scene, camera, renderer, controls;
 let dna;
 let mouseTitle = "";
-let intersected = [false, false, false, true]; // Mouse raycast intersected with object, Mouse down, Mouse move, Mouse enter
+let intersected = [false, false, false, true]; // Mouse raycast intersected with object, Mouse down, Mouse move, Mouse enter, touch
 let open = [false, false];
 let carbonpr = [new THREE.Mesh(), new THREE.Mesh(), new THREE.Mesh(), new THREE.Mesh()];
 let spin = true, carbon = false, dark = false;
@@ -28,15 +28,32 @@ init();
 animate();
 
 function setupListeners() {
-	window.addEventListener('mousemove', onMouseMove);
 	window.addEventListener('resize', onWindowResize);
-	window.addEventListener('mousedown', (e) => {
+
+	$("#mainScreen").on('pointermove', onMouseMove);
+
+	$("#mainScreen").on('pointerdown', (e) => {
+		mouse.x = ( e.clientX / window.innerWidth ) * 2 - 1;
+		mouse.y = - ( e.clientY / window.innerHeight ) * 2 + 1;
+
+		intersect();
+
 		if (intersected[0]) {
 			intersected[1] = true;
 			intersected[2] = false;
 		}
+
+		console.log("b")
+		console.log(intersected[0]);
+		console.log(intersected[1]);
+		console.log(intersected[2]);
 	});
-	window.addEventListener('mouseup', (e) => {
+
+	$("#mainScreen").on('pointerup', (e) => {
+		console.log("pup");
+		console.log(intersected[0]);
+		console.log(intersected[1]);
+		console.log(intersected[2]);
 		if (intersected[0] && intersected[1] && !intersected[2]) {
 			switch (mouseTitle) {
 				case "Adenine":
@@ -72,10 +89,10 @@ function setupListeners() {
 				default:
 					break;
 			}
-			intersected[0] = false;
-			intersected[1] = false;
-			intersected[2] = false;
 		}
+		intersected[0] = false;
+		intersected[1] = false;
+		intersected[2] = false;
 	});
 
 	$("#mainScreen").mouseenter((e) => {
@@ -86,7 +103,7 @@ function setupListeners() {
 		intersected[3] = false;
 	});
 
-	$("#description-btn").on( "click", (e) => {
+	$("#description-btn").on("click", (e) => {
 		if (e.target.classList.contains("active")) {
 			if (open[1]) {
 				openDescription("DNA",
@@ -299,9 +316,7 @@ function resetColor() {
 	}
 }
 
-function animate() {
-	requestAnimationFrame( animate );
-
+function intersect() {
 	raycaster.setFromCamera( mouse, camera );
 
 	const intersection = raycaster.intersectObjects(dna);
@@ -333,6 +348,12 @@ function animate() {
 	dna[1].instanceColor.needsUpdate = true;
 	dna[2].instanceColor.needsUpdate = true;
 	dna[3].instanceColor.needsUpdate = true;
+}
+
+function animate() {
+	requestAnimationFrame( animate );
+
+	intersect();
 
 	controls.update();
 
@@ -432,6 +453,8 @@ function onWindowResize() {
 }
 
 function onMouseMove(e) {
+	e.preventDefault();
+	console.log("move");
 	mouse.x = ( e.clientX / window.innerWidth ) * 2 - 1;
 	mouse.y = - ( e.clientY / window.innerHeight ) * 2 + 1;
 
