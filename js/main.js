@@ -1,16 +1,31 @@
 import * as THREE from 'three';
+import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
+import { FontLoader } from 'three/addons/loaders/FontLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 let scene, camera, renderer, controls;
-let dna;
-let spin = true;
+let dna; 
+let carbonpr = [new THREE.Mesh(), new THREE.Mesh(), new THREE.Mesh(), new THREE.Mesh()];
+let spin = true, carbon = false;
+let open = false;
 const p = new THREE.Object3D();
-const count = 30;
+const matrix4x4 = new THREE.Matrix4();
+const count = 20;
+const offsetclock = new THREE.Clock();
+const clock = new THREE.Clock();
+clock.stop();
 
-window.addEventListener('resize', onWindowResize);
+
+setupListeners();
+init();
+animate();
+
+function setupListeners() {
+	window.addEventListener('resize', onWindowResize);
 $("#description-btn").on( "click", (e) => {
-	$(".icon").css('display', 'none');
+	$("#icons").css('display', 'none');
 	$(".window").css('display', 'inline-block');
+	open = true;
 });
 
 $("#spin-btn").on("click", (e) => {
@@ -22,13 +37,21 @@ $("#spin-btn").on("click", (e) => {
 	}
 });
 
-$("#close-window").on("click", (e) => {
-	$(".icon").css('display', 'initial');
-	$(".window").css('display', 'none');
+$("#carbon-btn").on("click", (e) => {
+	if (e.target.classList.toggle("active")) {
+		carbon = true;
+	}
+	else {
+		carbon = false;
+	}
 });
 
-init();
-animate();
+$("#close-window").on("click", (e) => {
+	$("#icons").css('display', 'inline-block');
+	$(".window").css('display', 'none');
+	open = false;
+});
+}
 
 function init() {
 	scene = new THREE.Scene();
@@ -39,7 +62,7 @@ function init() {
 
 	camera = new THREE.PerspectiveCamera( 75, document.documentElement.clientWidth / document.documentElement.clientHeight, 0.1, 1000 );
 
-	camera.position.set(0, 0, 30);
+	camera.position.set(0, 0, 20);
 
 	controls = new OrbitControls( camera, renderer.domElement )
 	controls.listenToKeyEvents( window );
@@ -49,7 +72,7 @@ function init() {
 	controls.screenSpacePanning = false;
 	controls.minDistance = 10;
 	controls.maxDistance = 100;
-	controls.maxPolarAngle = Math.PI;
+	
 
 	const ambience = new THREE.AmbientLight( 0x808080, 10 );
 	scene.add( ambience );
@@ -113,6 +136,38 @@ function init() {
 		dna[3].setColorAt(c, color);
 		dna[3].instanceColor.needsUpdate = true;
 	}
+
+	const loader = new FontLoader();
+	loader.load( 'https://unpkg.com/three@0.157.0/examples/fonts/helvetiker_regular.typeface.json', 
+		function ( font ) {
+			const threepr = new TextGeometry('3\'', {
+				font: font,
+				size: 0.5,
+				height: 0,
+				curveSegments: 12
+			});
+			const fivepr = new TextGeometry('5\'', {
+				font: font,
+				size: 0.5,
+				height: 0,
+				curveSegments: 12
+			});
+			carbonpr = [
+				new THREE.Mesh(threepr, new THREE.MeshBasicMaterial({color: 0})),
+				new THREE.Mesh(fivepr, new THREE.MeshBasicMaterial({color: 0})),
+				new THREE.Mesh(fivepr, new THREE.MeshBasicMaterial({color: 0})),
+				new THREE.Mesh(threepr, new THREE.MeshBasicMaterial({color: 0}))
+			];
+			scene.add(carbonpr[0]);
+			scene.add(carbonpr[1]);
+			scene.add(carbonpr[2]);
+			scene.add(carbonpr[3]);
+		} 
+	);
+
+	scene.updateMatrixWorld(true);
+
+	clock.start();
 }
 
 function animate() {
@@ -123,25 +178,25 @@ function animate() {
 	render();
 }
 
-var tracktime = 0;
 var offsettime = 0;
 var time = 0;
 
 function render() {
-	tracktime = time;
 
 	if (spin) {
-		time = Date.now() * 0.001 - offsettime;
+		time = clock.getElapsedTime() * 0.5 + offsettime;
 	}
 	else {
-		offsettime = Date.now() * 0.001 - tracktime;
+		offsettime -= offsetclock.getDelta() * 0.5;
 	}
+
+	offsetclock.getDelta();
 
 	const offset = (count - 1)/2
 
 	for (let c = 0; c < count; c++) {
 		p.position.set(0, offset - c, 0);
-		p.rotation.y = (c % 10) * (36 * (Math.PI/180)) + tracktime;
+		p.rotation.y = (c % 10) * (36 * (Math.PI/180)) + time;
 		p.updateMatrix();
 
 		for (let x = 0; x < dna.length; x++) {
@@ -154,10 +209,50 @@ function render() {
 		dna[x].computeBoundingSphere();
 	}
 
+	scene.updateMatrixWorld(true);
+
+	for (let ind = 0; ind < carbonpr.length; ind++) { // 3 5 3 5
+		if (ind < 2) {
+			carbonpr[ind].position.set(
+				3 * Math.cos(time) * (1 - 2 * (ind % 2)), 
+				offset + 0.5, 
+				-3 * Math.sin(time) * (1 - 2 * (ind % 2))
+			);
+		}
+		else {
+			carbonpr[ind].position.set(
+				3 * Math.cos(((count - 1) % 10) * (36 * (Math.PI/180)) + time) * (1 - 2 * (ind % 2)), 
+				-offset + 0.5, 
+				-3 * Math.sin(((count - 1) % 10) * (36 * (Math.PI/180)) + time) * (1 - 2 * (ind % 2))
+			);
+		}
+		
+		carbonpr[ind].lookAt(camera.position);
+
+		if (carbon) {
+			carbonpr[ind].visible = true;
+		}
+		else {
+			carbonpr[ind].visible = false;
+		}
+	}
+
 	renderer.render( scene, camera );
 }
 
 function onWindowResize() {
+	console.log(open);
+	
+	if (document.documentElement.clientWidth > 768) {
+		$("#icons").css('display', 'inline-block');
+		$(".window").css('display', 'inline-block');
+	}
+	else if (open) {
+		$("#icons").css('display', 'none');
+	}
+	else if (!open) {
+		$(".window").css('display', 'none');
+	}
 	camera.aspect = document.documentElement.clientWidth / document.documentElement.clientHeight;
     camera.updateProjectionMatrix();
 
