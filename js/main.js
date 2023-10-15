@@ -4,53 +4,155 @@ import { FontLoader } from 'three/addons/loaders/FontLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 let scene, camera, renderer, controls;
-let dna; 
+let dna;
+let mouseTitle = "";
+let intersected = [false, false, false, true]; // Mouse raycast intersected with object, Mouse down, Mouse move, Mouse enter
+let open = [false, false];
 let carbonpr = [new THREE.Mesh(), new THREE.Mesh(), new THREE.Mesh(), new THREE.Mesh()];
-let spin = true, carbon = false;
-let open = false;
+let spin = true, carbon = false, dark = false;
+const count = 21;
+
+const color = new THREE.Color();
+const mouse = new THREE.Vector2(1, 1);
+const raycaster = new THREE.Raycaster();
 const p = new THREE.Object3D();
-const matrix4x4 = new THREE.Matrix4();
-const count = 20;
 const offsetclock = new THREE.Clock();
 const clock = new THREE.Clock();
-clock.stop();
 
+const title = $('#title');
+const description = $('#description');
+const descWindow = $('#window');
 
 setupListeners();
 init();
 animate();
 
 function setupListeners() {
+	window.addEventListener('mousemove', onMouseMove);
 	window.addEventListener('resize', onWindowResize);
-$("#description-btn").on( "click", (e) => {
-	$("#icons").css('display', 'none');
-	$(".window").css('display', 'inline-block');
-	open = true;
-});
+	window.addEventListener('mousedown', (e) => {
+		if (intersected[0]) {
+			intersected[1] = true;
+			intersected[2] = false;
+		}
+	});
+	window.addEventListener('mouseup', (e) => {
+		if (intersected[0] && intersected[1] && !intersected[2]) {
+			switch (mouseTitle) {
+				case "Adenine":
+					openDescription(mouseTitle, 
+						"PLACEHOLDER",	
+						"#58b07790",
+						true);
+					break;
+				case "Thymine":
+					openDescription(mouseTitle, 
+						"PLACEHOLDER",
+						"#f0424290",
+						true);
+					break;
+				case "Cytosine":
+					openDescription(mouseTitle, 
+						"PLACEHOLDER",
+						"#7d88f690",
+						true);
+					break;
+				case "Guanine":
+					openDescription(mouseTitle, 
+						"PLACEHOLDER",
+						"#f67da290",
+						true);
+					break;
+				case "Backbone":
+					openDescription(mouseTitle, 
+						"PLACEHOLDER",
+						"#a3a3a390",
+						true);
+					break;
+				default:
+					break;
+			}
+			intersected[0] = false;
+			intersected[1] = false;
+			intersected[2] = false;
+		}
+	});
 
-$("#spin-btn").on("click", (e) => {
-	if (e.target.classList.toggle("active")) {
-		spin = true;
-	}
-	else {
-		spin = false;
-	}
-});
+	$("#mainScreen").mouseenter((e) => {
+		intersected[3] = true;
+	});
 
-$("#carbon-btn").on("click", (e) => {
-	if (e.target.classList.toggle("active")) {
-		carbon = true;
-	}
-	else {
-		carbon = false;
-	}
-});
+	$("#mainScreen").mouseleave((e) => {
+		intersected[3] = false;
+	});
 
-$("#close-window").on("click", (e) => {
-	$("#icons").css('display', 'inline-block');
-	$(".window").css('display', 'none');
-	open = false;
-});
+	$("#description-btn").on( "click", (e) => {
+		if (e.target.classList.contains("active")) {
+			if (open[1]) {
+				openDescription("DNA",
+					"Deoxyribo Nucleic Acid (DNA) carries genetic information that defines nearly every living being.",
+					"#1b1b1b90",
+					false);
+			}
+			else {
+				e.target.classList.remove("active");
+				$("#window").css('display', 'none');
+				$("#icons").css('display', 'inline-block');
+				open[0] = false;
+			}
+		}
+		else {
+			openDescription("DNA",
+					"Deoxyribo Nucleic Acid (DNA) carries genetic information that defines nearly every living being.",
+					"#1b1b1b90",
+					false);
+		}
+	});
+
+	$("#description-btn").hover((e) => {
+		$('#window').css('box-shadow', '0 0 20px currentcolor');
+	}, (e) => {
+		$('#window').css('box-shadow', '0 0 12px currentcolor');
+	}
+	);
+
+	$("#spin-btn").on("click", (e) => {
+		if (e.target.classList.toggle("active")) {
+			spin = true;
+		}
+		else {
+			spin = false;
+		}
+	});
+
+	$("#carbon-btn").on("click", (e) => {
+		if (e.target.classList.toggle("active")) {
+			carbon = true;
+		}
+		else {
+			carbon = false;
+		}
+	});
+
+	$("#dark-btn").on("click", (e) => {
+		if (e.target.classList.toggle("active")) {
+			$("#dark-btn").text("dark_mode");
+			$("#mainScreen").css('background', 'radial-gradient(#1b1b1b 40%, #000000)');
+			dark = true;
+		}
+		else {
+			$("#dark-btn").text("light_mode");
+			$("#mainScreen").css('background', 'radial-gradient(#ffffff 40%, #9b9b9b)');
+			dark = false;
+		}
+	});
+
+	$("#close-window").on("click", (e) => {
+		$("#window").css('display', 'none');
+		$("#icons").css('display', 'inline-block');
+		$("#description-btn")[0].classList.remove("active");
+		open[0] = false;
+	});
 }
 
 function init() {
@@ -74,32 +176,24 @@ function init() {
 	controls.maxDistance = 100;
 	
 
-	const ambience = new THREE.AmbientLight( 0x808080, 10 );
+	const ambience = new THREE.AmbientLight( 0x909090, 10 );
 	scene.add( ambience );
 
 	const light = new THREE.PointLight( 0xffffff, 100, 100 );
-	light.position.set( 5, 5, 5 );
+	light.position.set(6, 8, 6);
 	light.castShadow = true;
-	scene.add( light );
-
-	/*
-	const groundplane = new THREE.Mesh(new THREE.BoxGeometry(10, 0.01, 10), new THREE.MeshPhongMaterial({color:0xffffff}));
-	groundplane.rotation.y = Math.PI/2;
-	groundplane.position.set(0, -11, 0);
-	groundplane.receiveShadow = true;
-	scene.add(groundplane);
-	*/
+	scene.add(light);
 
 	const back1 = new THREE.InstancedMesh(
 		new THREE.SphereGeometry(0.5, 64, 16).translate(2.5, 0, 0), 
-		new THREE.MeshLambertMaterial({color:0xa3a3a3}), 
+		new THREE.MeshLambertMaterial(), 
 		count
 	);
 	back1.castShadow = true;
 
 	const back2 = new THREE.InstancedMesh(
 		new THREE.SphereGeometry(0.5, 64, 16).translate(-2.5, 0, 0), 
-		new THREE.MeshLambertMaterial({color:0xa3a3a3}), 
+		new THREE.MeshLambertMaterial(), 
 		count
 	);
 	back2.castShadow = true;
@@ -123,17 +217,43 @@ function init() {
 	scene.add(dna[2]);
 	scene.add(dna[3]);
 
-	let color = new THREE.Color(0xffffff);
+	let bcolor = new THREE.Color(0xa3a3a3);
+	dna[0].userData.originalColor = [];
+	dna[1].userData.originalColor = [];
+	dna[2].userData.originalColor = [];
+	dna[3].userData.originalColor = [];
 
-	const baseColor = [0xeb4b4b, 0x5151d1, 0xfffd6e, 0x23e323];
+	dna[0].userData.whatIsThis = [];
+	dna[1].userData.whatIsThis = [];
+	dna[2].userData.whatIsThis = [];
+	dna[3].userData.whatIsThis = [];
+	
+	const what = ["Adenine", "Cytosine", "Guanine", "Thymine"];
+	const baseColor = [0x7df6a7, 0x7d88f6, 0xf67da2, 0xf04242];
 	let rand;
 	for (let c = 0; c < count; c++) {
+		bcolor.set(0xc6c6c6);
+		dna[0].userData.originalColor[c] = new THREE.Color(0xc6c6c6);
+		dna[1].userData.originalColor[c] = new THREE.Color(0xc6c6c6);
+		dna[0].userData.whatIsThis[c] = "Backbone";
+		dna[1].userData.whatIsThis[c] = "Backbone";
+		dna[0].setColorAt(c, bcolor);
+		dna[1].setColorAt(c, bcolor);
+		
 		rand = Math.floor(Math.random() * baseColor.length);
-		color = new THREE.Color(baseColor[rand]);
-		dna[2].setColorAt(c, color);
+		bcolor.set(baseColor[rand]);
+		dna[2].userData.originalColor[c] = new THREE.Color(baseColor[rand]);
+		dna[2].userData.whatIsThis[c] = what[rand];
+		dna[2].setColorAt(c, bcolor);
+
+		bcolor.set(baseColor[3 - rand]);
+		dna[3].userData.originalColor[c] = new THREE.Color(baseColor[3 - rand]);
+		dna[3].userData.whatIsThis[c] = what[3 - rand];
+		dna[3].setColorAt(c, bcolor);
+
+		dna[0].instanceColor.needsUpdate = true;
+		dna[1].instanceColor.needsUpdate = true;
 		dna[2].instanceColor.needsUpdate = true;
-		color = new THREE.Color(baseColor[3 - rand]);
-		dna[3].setColorAt(c, color);
 		dna[3].instanceColor.needsUpdate = true;
 	}
 
@@ -170,8 +290,49 @@ function init() {
 	clock.start();
 }
 
+function resetColor() {
+	for (let s = 0; s < count; s++) {
+		dna[0].setColorAt(s, dna[0].userData.originalColor[s]);
+		dna[1].setColorAt(s, dna[1].userData.originalColor[s]);
+		dna[2].setColorAt(s, dna[2].userData.originalColor[s]);
+		dna[3].setColorAt(s, dna[3].userData.originalColor[s]);
+	}
+}
+
 function animate() {
 	requestAnimationFrame( animate );
+
+	raycaster.setFromCamera( mouse, camera );
+
+	const intersection = raycaster.intersectObjects(dna);
+
+	if (intersection.length > 0 && intersected[3]) {
+		intersected[0] = true;
+		resetColor();
+		const currentObject = intersection[0].object;
+		const instanceId = intersection[0].instanceId;
+
+		currentObject.getColorAt(instanceId, color)
+		const oColor = currentObject.userData.originalColor[instanceId];
+		if (Math.round(color["r"] * 100) / 100 == Math.round(oColor["r"] * 100) / 100 &&
+			Math.round(color["g"] * 100) / 100 == Math.round(oColor["g"] * 100) / 100 &&
+			Math.round(color["b"] * 100) / 100 == Math.round(oColor["b"] * 100) / 100
+			) {
+			currentObject.getColorAt(instanceId, color);
+			currentObject.setColorAt(instanceId, color.multiplyScalar(2));
+		}
+		mouseTitle = currentObject.userData.whatIsThis[instanceId];
+		
+	}
+	else {
+		intersected[0] = false;
+		mouseTitle = "";
+		resetColor();
+	}
+	dna[0].instanceColor.needsUpdate = true;
+	dna[1].instanceColor.needsUpdate = true;
+	dna[2].instanceColor.needsUpdate = true;
+	dna[3].instanceColor.needsUpdate = true;
 
 	controls.update();
 
@@ -182,6 +343,18 @@ var offsettime = 0;
 var time = 0;
 
 function render() {
+	if (dark) {
+		carbonpr[0].material.color = new THREE.Color(0xffffff);
+		carbonpr[1].material.color = new THREE.Color(0xffffff);
+		carbonpr[2].material.color = new THREE.Color(0xffffff);
+		carbonpr[3].material.color = new THREE.Color(0xffffff);
+	}
+	else {
+		carbonpr[0].material.color = new THREE.Color(0);
+		carbonpr[1].material.color = new THREE.Color(0);
+		carbonpr[2].material.color = new THREE.Color(0);
+		carbonpr[3].material.color = new THREE.Color(0);
+	}
 
 	if (spin) {
 		time = clock.getElapsedTime() * 0.5 + offsettime;
@@ -241,20 +414,43 @@ function render() {
 }
 
 function onWindowResize() {
-	console.log(open);
-	
 	if (document.documentElement.clientWidth > 768) {
 		$("#icons").css('display', 'inline-block');
-		$(".window").css('display', 'inline-block');
 	}
-	else if (open) {
-		$("#icons").css('display', 'none');
-	}
-	else if (!open) {
-		$(".window").css('display', 'none');
+	else {
+		if (open[0]) {
+			$("#icons").css('display', 'none');
+		}
+		else {
+			$("#icons").css('display', 'inline-block');
+		}
 	}
 	camera.aspect = document.documentElement.clientWidth / document.documentElement.clientHeight;
     camera.updateProjectionMatrix();
 
     renderer.setSize(document.documentElement.clientWidth, document.documentElement.clientHeight);
+}
+
+function onMouseMove(e) {
+	mouse.x = ( e.clientX / window.innerWidth ) * 2 - 1;
+	mouse.y = - ( e.clientY / window.innerHeight ) * 2 + 1;
+
+	intersected[2] = true;
+}
+
+function openDescription(t, d, c, o) {
+	title.text(t);
+	description.text(d);
+	if (document.documentElement.clientWidth < 768) {
+		$('#icons').css('display', 'none');
+	}
+
+	descWindow.css('display', 'inline-block');
+	descWindow.css('background-color', c);
+	descWindow.css('box-shadow', '0 0 12px' + c);
+	descWindow.css('color', c);
+	open[0] = true;
+	open[1] = o;
+
+	$("#description-btn")[0].classList.add("active");
 }
