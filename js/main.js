@@ -93,9 +93,6 @@ function setupListeners() {
 		intersected[0] = false;
 		intersected[1] = false;
 		intersected[2] = false;
-		
-		mouse.x = -1;
-		mouse.y = -1;
 	});
 
 	$("#mainScreen").mouseenter((e) => {
