@@ -96,6 +96,19 @@
     color: white;
 }
 
+#footer {
+    pointer-events: initial;
+    position: absolute;
+    right: 0;
+    bottom: 0;
+}
+
+#footer a {
+    font-family: 'Source Code Pro', monospace;
+    text-decoration: none;
+    color:white;
+}
+
 @media only screen and (max-width: 768px) {
     #window {
         display: none;
