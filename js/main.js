@@ -58,31 +58,31 @@ function setupListeners() {
 			switch (mouseTitle) {
 				case "Adenine":
 					openDescription(mouseTitle, 
-						"PLACEHOLDER",	
+						"One of the nitrogenous bases found in both DNA and RNA. Pairs with thymine in DNA and uracil in RNA. Adenine forms 2 hydrogen bonds with thymine. Adenine is a purine (double-ringed structure).",	
 						"#58b07790",
 						true);
 					break;
 				case "Thymine":
 					openDescription(mouseTitle, 
-						"PLACEHOLDER",
+						"A nitrogenous base that is only found in DNA. it pairs with adenine in DNA. Thymine is also one of the pyrimidines (single-ringed structure).",
 						"#f0424290",
 						true);
 					break;
 				case "Cytosine":
 					openDescription(mouseTitle, 
-						"PLACEHOLDER",
+						"Nitrogenous base that is found in both DNA and RNA. It pairs with guanine. It is a pyrimidine (single-ringed structure).",
 						"#7d88f690",
 						true);
 					break;
 				case "Guanine":
 					openDescription(mouseTitle, 
-						"PLACEHOLDER",
+						"Nitrogenous base that is found in both DNA and RNA. It pairs with cytosine. Guanine is one of the purines (double-ringed structure).",
 						"#f67da290",
 						true);
 					break;
 				case "Backbone":
 					openDescription(mouseTitle, 
-						"PLACEHOLDER",
+						"The backbone serves as the structure support of the DNA strand. It holds the sugar and the phosphate group with a phosphodiester bond. The formation of the phosphodiester linkage itself is formed through a condensation reaction (process of water removal). It connects the 5th oxygen on the sugar and the 3rd oxygen of another sugar.",
 						"#a3a3a390",
 						true);
 					break;
